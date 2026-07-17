@@ -9,7 +9,6 @@
  * 4. The single DOM write: document.documentElement.style.setProperty('--dpi', dpi)
  *    instantly resizes ALL ActualSizeViewer components on the page via CSS calc()
  */
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type CalibrationMethod = "credit-card" | "coin" | "monitor" | "default";
@@ -203,7 +202,7 @@ export function attachDragCalibration(
   }
 
   // Handle element — attach to the right edge grip
-  const handle = guideEl.querySelector<HTMLElement>(".calibration-guide__handle");
+  const handle = guideEl.querySelector<HTMLElement>(".cal-guide__handle");
   const target = handle ?? guideEl;
 
   target.addEventListener("mousedown", onMouseDown);
@@ -236,9 +235,11 @@ export { CALIBRATION_REFS };
     _state = saved;
     applyDpi(saved.dpi);
   } else {
-    // Try auto-detect via devicePixelRatio as a rough heuristic
-    // Most modern displays are 96 * devicePixelRatio DPI
-    const estimatedDpi = 96 * (window.devicePixelRatio ?? 1);
+    // Use the CSS reference pixel default (96 DPI) as the auto-detect baseline.
+    // DPR is intentionally excluded: --dpi represents CSS pixels per physical inch,
+    // and the browser's DPR already maps CSS px → physical px. Multiplying by DPR
+    // would double-count, causing ~2× oversized rendering on Retina displays.
+    const estimatedDpi = DEFAULT_DPI;
     applyDpi(estimatedDpi);
     _state.dpi = estimatedDpi;
   }
