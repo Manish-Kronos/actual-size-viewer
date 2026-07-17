@@ -1,0 +1,47 @@
+[
+  {
+    "id": "coins",
+    "slug": "coins",
+    "name": "Coins",
+    "icon": "🪙",
+    "description": "See coins from around the world at their true physical size.",
+    "metaTitle": "Coins at Actual Size — Compare Real-World Coin Dimensions",
+    "metaDescription": "See US quarters, pennies, euro coins, and more displayed at their true physical size on your screen. Calibrate once, compare instantly."
+  },
+  {
+    "id": "credit-cards",
+    "slug": "credit-cards",
+    "name": "Cards",
+    "icon": "💳",
+    "description": "Credit cards, IDs, and standard cards at real physical size.",
+    "metaTitle": "Credit Cards at Actual Size — Standard Card Dimensions on Screen",
+    "metaDescription": "See credit cards, debit cards, and ID cards displayed at their true ISO 7810 physical size. Perfect for design mockups and size reference."
+  },
+  {
+    "id": "paper",
+    "slug": "paper",
+    "name": "Paper",
+    "icon": "📄",
+    "description": "Paper sizes from A4 to Letter at actual physical dimensions.",
+    "metaTitle": "Paper Sizes at Actual Size — A4, Letter, A3 and More",
+    "metaDescription": "See A4, Letter, Legal, A3, and other paper sizes displayed at their true physical dimensions on your screen. Essential for print design."
+  },
+  {
+    "id": "phones",
+    "slug": "phones",
+    "name": "Phones",
+    "icon": "📱",
+    "description": "Smartphone dimensions at actual screen size for comparison.",
+    "metaTitle": "Phone Sizes at Actual Size — Compare Smartphone Dimensions",
+    "metaDescription": "See iPhone, Samsung Galaxy, and other smartphones at their true physical size. Compare phone dimensions before you buy."
+  },
+  {
+    "id": "currency",
+    "slug": "currency",
+    "name": "Currency",
+    "icon": "💵",
+    "description": "Banknotes and bills at their actual physical dimensions.",
+    "metaTitle": "Banknotes at Actual Size — Real-World Currency Dimensions",
+    "metaDescription": "See US Dollar bills, Euro banknotes, and other currency at their true physical size on your screen."
+  }
+]

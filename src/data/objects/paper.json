@@ -1,0 +1,64 @@
+[
+  {
+    "id": "a4-paper",
+    "slug": "a4-paper",
+    "name": "A4 Paper",
+    "category": "paper",
+    "tags": ["iso-216", "letter-size", "printing", "international"],
+    "dimensions": {
+      "widthMm": 210,
+      "heightMm": 297,
+      "shape": "rect"
+    },
+    "display": {
+      "color": "#fffef7",
+      "borderColor": "#d0cfc0"
+    },
+    "meta": {
+      "title": "A4 Paper Actual Size — 210 × 297 mm on Your Screen",
+      "description": "See an A4 sheet of paper (210 × 297 mm) at its true physical size. The world's most common paper size, used in over 160 countries.",
+      "h1": "A4 Paper — Actual Size on Screen",
+      "facts": [
+        "Width: 210 mm (8.27 inches)",
+        "Height: 297 mm (11.69 inches)",
+        "Standard: ISO 216",
+        "Used in over 160 countries (all except US and Canada)",
+        "Aspect ratio: 1:√2 (approximately 1:1.414)"
+      ],
+      "relatedSlugs": ["letter-paper", "a3-paper"],
+      "source": "https://www.iso.org/standard/36631.html",
+      "updatedAt": "2025-01-15"
+    }
+  },
+  {
+    "id": "letter-paper",
+    "slug": "letter-paper",
+    "name": "US Letter Paper",
+    "category": "paper",
+    "tags": ["ansi-a", "us-standard", "printing", "north-america"],
+    "dimensions": {
+      "widthMm": 215.9,
+      "heightMm": 279.4,
+      "shape": "rect"
+    },
+    "display": {
+      "color": "#fffef7",
+      "borderColor": "#d0cfc0"
+    },
+    "meta": {
+      "title": "US Letter Paper Actual Size — 8.5 × 11 Inch on Screen",
+      "description": "See a US Letter sheet (215.9 × 279.4 mm / 8.5 × 11 in) at its true physical size on your screen. The standard paper size in the US and Canada.",
+      "h1": "US Letter Paper — Actual Size on Screen",
+      "facts": [
+        "Width: 215.9 mm (8.5 inches)",
+        "Height: 279.4 mm (11.0 inches)",
+        "Standard: ANSI/ASME Y14.1",
+        "Used primarily in the USA and Canada",
+        "Slightly wider and shorter than A4"
+      ],
+      "relatedSlugs": ["a4-paper", "a3-paper"],
+      "source": "https://www.ansi.org/",
+      "updatedAt": "2025-01-15"
+    }
+  }
+]

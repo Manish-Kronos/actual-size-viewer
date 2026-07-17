@@ -1,0 +1,81 @@
+---
+interface Props {
+  type: 'leaderboard' | 'sidebar' | 'in-content';
+  className?: string;
+}
+
+const { type, className = '' } = Astro.props;
+
+const dimensions = {
+  leaderboard: {
+    height: '90px',
+    maxWidth: '728px',
+    label: 'Leaderboard Ad Placeholder (728x90)'
+  },
+  sidebar: {
+    height: '250px',
+    maxWidth: '300px',
+    label: 'Sidebar Ad Placeholder (300x250)'
+  },
+  'in-content': {
+    height: '120px',
+    maxWidth: '100%',
+    label: 'In-Content Ad Placeholder'
+  }
+};
+
+const current = dimensions[type];
+---
+
+<div 
+  class={`ad-slot-wrapper ${type} ${className}`} 
+  style={`height: ${current.height}; max-width: ${current.maxWidth};`}
+>
+  <div class="ad-badge">ADVERTISEMENT</div>
+  <div class="ad-placeholder-text">{current.label}</div>
+</div>
+
+<style>
+  .ad-slot-wrapper {
+    width: 100%;
+    margin: 16px auto;
+    background-color: hsla(var(--border-color-hsl), 0.25);
+    border: 1px dashed hsla(var(--border-color-hsl), 0.8);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    transition: var(--transition-smooth);
+  }
+
+  .ad-badge {
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: hsl(var(--text-secondary-hsl));
+    opacity: 0.7;
+  }
+
+  .ad-placeholder-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: hsl(var(--text-secondary-hsl));
+    text-align: center;
+    padding: 10px;
+  }
+
+  .sidebar {
+    height: 250px;
+  }
+
+  .leaderboard {
+    height: 90px;
+  }
+</style>

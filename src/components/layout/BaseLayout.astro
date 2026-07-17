@@ -1,0 +1,361 @@
+---
+/**
+ * BaseLayout for all Actual Size Engine pages.
+ * Lives at src/components/layout/BaseLayout.astro (separate from existing layouts/BaseLayout.astro).
+ *
+ * Responsibilities:
+ * - Full SEO <head> (title, meta, OG, Twitter, canonical, JSON-LD)
+ * - Google Fonts (Inter)
+ * - FOUC-free dark mode
+ * - Calibration engine script (type="module", deferred — single JS file)
+ * - Consistent page shell (header slot, main, footer slot)
+ */
+import { siteConfig } from "../../config";
+import "../../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  jsonLd?: object | object[];
+  robots?: string;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage = siteConfig.ogImage,
+  jsonLd,
+  robots = "index, follow",
+} = Astro.props;
+
+const canonicalURL = canonical
+  ? new URL(canonical, siteConfig.url).href
+  : new URL(Astro.url.pathname, Astro.site || siteConfig.url).href;
+
+const socialImageURL = new URL(ogImage, Astro.url.origin).href;
+
+// Normalise jsonLd to array for easy multi-schema pages
+const jsonLdSchemas = jsonLd
+  ? Array.isArray(jsonLd)
+    ? jsonLd
+    : [jsonLd]
+  : [];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Core -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <meta name="author" content={siteConfig.author} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={socialImageURL} />
+    <meta property="og:site_name" content={siteConfig.name} />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageURL} />
+
+    <!-- JSON-LD Structured Data -->
+    {jsonLdSchemas.map((schema) => (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
+
+    <!-- Google Fonts: Inter — weights used: 400 500 600 700 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+
+    <!-- FOUC-Prevention: apply theme before paint -->
+    <script is:inline>
+      (function () {
+        var theme =
+          typeof localStorage !== "undefined" && localStorage.getItem("theme")
+            ? localStorage.getItem("theme")
+            : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        if (theme === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+      })();
+    </script>
+
+    <!-- Calibration Engine — the only JS module shipped to the browser -->
+    <script src="../../scripts/calibration-engine.ts" type="module"></script>
+  </head>
+  <body>
+    <!-- Header slot (optional override) -->
+    <slot name="header">
+      <header class="site-header">
+        <div class="container site-header__inner">
+          <a href="/" class="site-header__logo" aria-label="Actual Size — Home">
+            <span class="site-header__logo-mark">◎</span>
+            <span class="site-header__logo-text">ActualSize</span>
+          </a>
+          <nav class="site-header__nav" aria-label="Main navigation">
+            <a href="/coins">Coins</a>
+            <a href="/credit-cards">Cards</a>
+            <a href="/paper">Paper</a>
+            <a href="/phones">Phones</a>
+            <a href="/currency">Currency</a>
+          </nav>
+          <div class="site-header__actions">
+            <a href="/calibration" class="site-header__calibrate-btn" id="header-calibrate-btn">
+              <span class="calibration-dot" id="header-calibration-dot"></span>
+              Calibrate
+            </a>
+          </div>
+        </div>
+      </header>
+    </slot>
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <div class="site-footer__brand">
+          <a href="/" class="site-header__logo" aria-label="ActualSize Home">
+            <span class="site-header__logo-mark">◎</span>
+            <span class="site-header__logo-text">ActualSize</span>
+          </a>
+          <p>See the world at real size.</p>
+        </div>
+        <nav class="site-footer__nav" aria-label="Footer navigation">
+          <div class="site-footer__col">
+            <h3>Categories</h3>
+            <a href="/coins">Coins</a>
+            <a href="/credit-cards">Cards</a>
+            <a href="/paper">Paper</a>
+            <a href="/phones">Phones</a>
+            <a href="/currency">Currency</a>
+          </div>
+          <div class="site-footer__col">
+            <h3>Tools</h3>
+            <a href="/">Object Browser</a>
+            <a href="/calibration">Calibrate Screen</a>
+          </div>
+        </nav>
+      </div>
+      <div class="site-footer__bottom">
+        <p class="container">
+          © {new Date().getFullYear()} ActualSize · All dimensions sourced from official specifications.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  /* ── Site Header ─────────────────────────────────────────── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 60px;
+    background-color: hsla(var(--bg-primary-hsl), 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid hsl(var(--border-color-hsl));
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    gap: 24px;
+  }
+
+  .site-header__logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: hsl(var(--text-primary-hsl));
+    flex-shrink: 0;
+  }
+
+  .site-header__logo-mark {
+    font-size: 1.3rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .site-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .site-header__nav a {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: hsl(var(--text-secondary-hsl));
+    transition: var(--transition-quick);
+  }
+
+  .site-header__nav a:hover {
+    background-color: hsl(var(--bg-secondary-hsl));
+    color: hsl(var(--text-primary-hsl));
+  }
+
+  .site-header__calibrate-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--accent-gradient);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition-quick);
+    white-space: nowrap;
+  }
+
+  .site-header__calibrate-btn:hover {
+    opacity: 0.9;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  /* Green dot = calibrated, grey = uncalibrated */
+  .calibration-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.5);
+    transition: background-color 0.3s;
+    flex-shrink: 0;
+  }
+
+  .calibration-dot.is-calibrated {
+    background-color: #4ade80;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+  }
+
+  @media (max-width: 700px) {
+    .site-header__nav { display: none; }
+  }
+
+  /* ── Site Footer ─────────────────────────────────────────── */
+  .site-footer {
+    margin-top: auto;
+    border-top: 1px solid hsl(var(--border-color-hsl));
+    padding-top: 48px;
+  }
+
+  .site-footer__inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    padding-bottom: 40px;
+  }
+
+  .site-footer__brand p {
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+
+  .site-footer__nav {
+    display: flex;
+    gap: 40px;
+  }
+
+  .site-footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .site-footer__col h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: hsl(var(--text-secondary-hsl));
+  }
+
+  .site-footer__col a {
+    font-size: 0.9rem;
+    color: hsl(var(--text-secondary-hsl));
+    transition: var(--transition-quick);
+  }
+
+  .site-footer__col a:hover { color: hsl(var(--accent-hsl)); }
+
+  .site-footer__bottom {
+    border-top: 1px solid hsl(var(--border-color-hsl));
+    padding: 16px 0;
+  }
+
+  .site-footer__bottom p {
+    font-size: 0.8rem;
+    color: hsl(var(--text-secondary-hsl));
+  }
+
+  @media (max-width: 600px) {
+    .site-footer__inner { grid-template-columns: 1fr; }
+    .site-footer__nav { flex-wrap: wrap; gap: 24px; }
+  }
+
+  /* ── Main content ────────────────────────────────────────── */
+  #main-content {
+    min-height: calc(100vh - 60px);
+  }
+</style>
+
+<script>
+  // Update calibration dot in header when calibration changes
+  window.addEventListener("calibration:updated", (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    const dot = document.getElementById("header-calibration-dot");
+    if (dot) {
+      dot.classList.toggle("is-calibrated", detail.confidence !== "default" && detail.confidence !== "low");
+    }
+  });
+
+  // Also check on load in case calibration is already saved
+  window.addEventListener("DOMContentLoaded", () => {
+    const state = (window as any).__actualsize?.getState?.();
+    const dot = document.getElementById("header-calibration-dot");
+    if (dot && state && state.confidence === "high") {
+      dot.classList.add("is-calibrated");
+    }
+  });
+</script>

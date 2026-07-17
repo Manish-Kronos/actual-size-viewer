@@ -1,0 +1,322 @@
+---
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import CalibrationBar from "../../components/core/CalibrationBar.astro";
+import ActualSizeViewer from "../../components/core/ActualSizeViewer.astro";
+import ObjectCard from "../../components/core/ObjectCard.astro";
+import BreadcrumbNav from "../../components/seo/BreadcrumbNav.astro";
+import { getObjectPaths, getRelatedObjects, getCategoryBySlug } from "../../lib/objectUtils";
+import { getObjectPageTitle, getObjectCanonicalUrl, buildObjectJsonLd, buildBreadcrumbJsonLd, SITE_URL } from "../../lib/seo";
+import { round, mmToIn, mmToCm } from "../../lib/rendering";
+import type { ActualSizeObject } from "../../data/schema";
+
+export async function getStaticPaths() {
+  return getObjectPaths();
+}
+
+interface Props {
+  object: ActualSizeObject;
+}
+
+const { object } = Astro.props;
+const { widthMm, heightMm, shape } = object.dimensions;
+const isCircle = shape === "circle";
+
+const title = getObjectPageTitle(object);
+const canonicalUrl = getObjectCanonicalUrl(object);
+const jsonLd = buildObjectJsonLd(object, canonicalUrl);
+
+const category = getCategoryBySlug(object.category);
+const relatedObjects = getRelatedObjects(object.meta.relatedSlugs, object.slug);
+
+const breadcrumbs = [
+  { name: "Home", href: "/" },
+  { name: category?.name ?? object.category, href: `/${object.category}` },
+  { name: object.name, href: `/${object.category}/${object.slug}` },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={object.meta.description}
+  canonical={canonicalUrl}
+  jsonLd={jsonLd}
+>
+  <CalibrationBar />
+
+  <article class="obj-page">
+    <div class="container">
+
+      <!-- Breadcrumb -->
+      <div class="obj-page__breadcrumb">
+        <BreadcrumbNav crumbs={breadcrumbs} />
+      </div>
+
+      <!-- Page header -->
+      <header class="obj-page__header">
+        <h1 class="obj-page__title">{object.meta.h1}</h1>
+        <p class="obj-page__subtitle">{object.meta.description}</p>
+      </header>
+
+      <!-- Main content: viewer + sidebar -->
+      <div class="obj-page__content">
+
+        <!-- LEFT: Actual size viewer -->
+        <div class="obj-page__viewer-col">
+          <div class="obj-page__viewer-box glass">
+            <div class="obj-page__viewer-label">
+              <span class="obj-page__viewer-badge">Actual Size</span>
+              <span class="obj-page__viewer-note">Calibrate your screen for accuracy</span>
+            </div>
+            <div class="obj-page__viewer-stage">
+              <ActualSizeViewer object={object} showLabel={true} showRulerOverlay={false} />
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Dimensions + facts sidebar -->
+        <aside class="obj-page__sidebar">
+
+          <!-- Dimensions table -->
+          <section class="obj-page__section">
+            <h2 class="obj-page__section-title">Dimensions</h2>
+            <table class="dimensions-table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>mm</th>
+                  <th>cm</th>
+                  <th>in</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isCircle ? (
+                  <tr>
+                    <td>Diameter</td>
+                    <td>{round(widthMm, 2)} mm</td>
+                    <td>{mmToCm(widthMm)} cm</td>
+                    <td>{mmToIn(widthMm)} in</td>
+                  </tr>
+                ) : (
+                  <>
+                    <tr>
+                      <td>Width</td>
+                      <td>{round(widthMm, 2)} mm</td>
+                      <td>{mmToCm(widthMm)} cm</td>
+                      <td>{mmToIn(widthMm)} in</td>
+                    </tr>
+                    <tr>
+                      <td>Height</td>
+                      <td>{round(heightMm, 2)} mm</td>
+                      <td>{mmToCm(heightMm)} cm</td>
+                      <td>{mmToIn(heightMm)} in</td>
+                    </tr>
+                  </>
+                )}
+                {object.dimensions.depthMm && (
+                  <tr>
+                    <td>Depth</td>
+                    <td>{round(object.dimensions.depthMm, 2)} mm</td>
+                    <td>{mmToCm(object.dimensions.depthMm)} cm</td>
+                    <td>{mmToIn(object.dimensions.depthMm)} in</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+
+          <!-- Facts -->
+          <section class="obj-page__section">
+            <h2 class="obj-page__section-title">Facts</h2>
+            <ul class="facts-list">
+              {object.meta.facts.map((fact) => (
+                <li>{fact}</li>
+              ))}
+            </ul>
+          </section>
+
+          <!-- Source -->
+          {object.meta.source && (
+            <p class="obj-page__source">
+              Source: <a href={object.meta.source} target="_blank" rel="noopener noreferrer">
+                Official specification ↗
+              </a>
+            </p>
+          )}
+        </aside>
+      </div>
+
+      <!-- Related objects -->
+      {relatedObjects.length > 0 && (
+        <section class="obj-page__related">
+          <h2 class="obj-page__section-title">Related Objects</h2>
+          <div class="related-row">
+            {relatedObjects.map((obj) => (
+              <ObjectCard object={obj} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- SEO content block -->
+      <section class="obj-page__seo-content">
+        <h2>About the {object.name}</h2>
+        <p>{object.meta.description}</p>
+        <p>
+          Use our screen calibration tool above to ensure accurate rendering.
+          Once calibrated, the {object.name} above is displayed at its true physical size —
+          you can place the real object on your screen to verify.
+        </p>
+        {!isCircle && (
+          <p>
+            The {object.name} measures {round(widthMm, 2)} mm ({mmToIn(widthMm)} inches) wide
+            and {round(heightMm, 2)} mm ({mmToIn(heightMm)} inches) tall.
+          </p>
+        )}
+        {isCircle && (
+          <p>
+            The {object.name} has a diameter of {round(widthMm, 2)} mm ({mmToIn(widthMm)} inches).
+          </p>
+        )}
+        <p>
+          <a href={`/${object.category}`}>See all {category?.name ?? object.category}</a> or{" "}
+          <a href="/">browse all objects</a> at actual size.
+        </p>
+      </section>
+
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .obj-page {
+    padding: 28px 0 80px;
+  }
+
+  .obj-page__breadcrumb {
+    margin-bottom: 24px;
+  }
+
+  .obj-page__header {
+    margin-bottom: 36px;
+  }
+
+  .obj-page__title {
+    margin-bottom: 10px;
+  }
+
+  .obj-page__subtitle {
+    max-width: 600px;
+    font-size: 1rem;
+  }
+
+  /* Two-column layout */
+  .obj-page__content {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 40px;
+    align-items: start;
+    margin-bottom: 60px;
+  }
+
+  /* Viewer */
+  .obj-page__viewer-box {
+    border-radius: var(--radius-md);
+    padding: 32px;
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .obj-page__viewer-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .obj-page__viewer-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    background: var(--accent-gradient);
+    color: white;
+    border-radius: 100px;
+  }
+
+  .obj-page__viewer-note {
+    font-size: 0.8rem;
+    color: hsl(var(--text-secondary-hsl));
+  }
+
+  .obj-page__viewer-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    overflow: auto;
+    padding: 20px;
+    background-color: hsla(var(--bg-primary-hsl), 0.5);
+    border-radius: var(--radius-sm);
+    border: 1px dashed hsl(var(--border-color-hsl));
+  }
+
+  /* Sidebar */
+  .obj-page__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .obj-page__section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .obj-page__section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(var(--text-secondary-hsl));
+    font-size: 0.82rem;
+    border-bottom: 1px solid hsl(var(--border-color-hsl));
+    padding-bottom: 8px;
+  }
+
+  .obj-page__source {
+    font-size: 0.8rem;
+    color: hsl(var(--text-secondary-hsl));
+  }
+
+  /* Related */
+  .obj-page__related {
+    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* SEO content */
+  .obj-page__seo-content {
+    border-top: 1px solid hsl(var(--border-color-hsl));
+    padding-top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 740px;
+  }
+
+  .obj-page__seo-content h2 {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+  }
+
+  @media (max-width: 860px) {
+    .obj-page__content {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

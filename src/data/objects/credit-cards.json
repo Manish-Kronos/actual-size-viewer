@@ -1,0 +1,64 @@
+[
+  {
+    "id": "standard-credit-card",
+    "slug": "standard-credit-card",
+    "name": "Standard Credit Card",
+    "category": "credit-cards",
+    "tags": ["visa", "mastercard", "id-1", "iso-7810", "wallet"],
+    "dimensions": {
+      "widthMm": 85.6,
+      "heightMm": 53.98,
+      "shape": "rect"
+    },
+    "display": {
+      "color": "#1a1a2e",
+      "borderColor": "#4a4a6a"
+    },
+    "meta": {
+      "title": "Credit Card Actual Size — Standard Card Dimensions on Screen",
+      "description": "See a standard credit card (85.60 × 53.98 mm) at its exact physical size on your screen. The ISO 7810 ID-1 format used worldwide.",
+      "h1": "Standard Credit Card — Actual Size on Screen",
+      "facts": [
+        "Width: 85.60 mm (3.370 inches)",
+        "Height: 53.98 mm (2.125 inches)",
+        "Thickness: 0.76 mm (standard)",
+        "Standard: ISO/IEC 7810 ID-1",
+        "Used by: Visa, Mastercard, Amex, driver's licenses, ID cards"
+      ],
+      "relatedSlugs": ["business-card"],
+      "source": "https://www.iso.org/standard/70483.html",
+      "updatedAt": "2025-01-15"
+    }
+  },
+  {
+    "id": "business-card",
+    "slug": "business-card",
+    "name": "Standard Business Card",
+    "category": "credit-cards",
+    "tags": ["business", "networking", "print", "us-standard"],
+    "dimensions": {
+      "widthMm": 88.9,
+      "heightMm": 50.8,
+      "shape": "rect"
+    },
+    "display": {
+      "color": "#f5f5f5",
+      "borderColor": "#d0d0d0"
+    },
+    "meta": {
+      "title": "Business Card Actual Size — Standard US Business Card Dimensions",
+      "description": "See a standard US business card (88.9 × 50.8 mm) at its true physical size on screen. Essential reference for print designers.",
+      "h1": "Standard Business Card — Actual Size on Screen",
+      "facts": [
+        "Width: 88.9 mm (3.5 inches)",
+        "Height: 50.8 mm (2.0 inches)",
+        "US Standard (differs from EU 85 × 55 mm)",
+        "Common stock: 14–16pt card stock",
+        "Print bleed area: typically +3mm all sides"
+      ],
+      "relatedSlugs": ["standard-credit-card"],
+      "source": "https://www.printingforless.com/business-card-sizes.html",
+      "updatedAt": "2025-01-15"
+    }
+  }
+]

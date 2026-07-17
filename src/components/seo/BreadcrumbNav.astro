@@ -1,0 +1,37 @@
+---
+/**
+ * BreadcrumbNav — Renders both a visual breadcrumb and BreadcrumbList JSON-LD.
+ */
+import { buildBreadcrumbJsonLd, SITE_URL } from "../../lib/seo";
+
+interface Crumb {
+  name: string;
+  href: string;
+}
+interface Props {
+  crumbs: Crumb[];
+}
+const { crumbs } = Astro.props;
+
+// JSON-LD uses absolute URLs
+const schemacrumbs = crumbs.map((c) => ({
+  name: c.name,
+  url: c.href.startsWith("http") ? c.href : `${SITE_URL}${c.href}`,
+}));
+const jsonLd = buildBreadcrumbJsonLd(schemacrumbs);
+---
+
+<!-- Visual breadcrumb -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  {crumbs.map((crumb, i) => (
+    i < crumbs.length - 1
+      ? <>
+          <a href={crumb.href}>{crumb.name}</a>
+          <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        </>
+      : <span class="breadcrumb__current" aria-current="page">{crumb.name}</span>
+  ))}
+</nav>
+
+<!-- JSON-LD BreadcrumbList -->
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

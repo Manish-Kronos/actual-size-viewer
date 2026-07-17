@@ -1,0 +1,145 @@
+---
+/**
+ * ObjectCard — Grid card showing an object with a mini actual-size preview.
+ *
+ * The mini preview is a scaled-down representation proportional to the real object.
+ * It does NOT render at actual size (that would be too large for a card).
+ * The ActualSizeViewer on the object's detail page is the actual-size renderer.
+ */
+import type { ActualSizeObject } from "../../data/schema";
+import { round, mmToIn } from "../../lib/rendering";
+
+interface Props {
+  object: ActualSizeObject;
+}
+
+const { object } = Astro.props;
+const { widthMm, heightMm, shape } = object.dimensions;
+const { color, borderColor } = object.display;
+
+const isCircle = shape === "circle";
+const dimLabel = isCircle
+  ? `⌀ ${round(widthMm, 2)} mm`
+  : `${round(widthMm, 2)} × ${round(heightMm, 2)} mm`;
+
+// Mini preview: scale so longest dimension = 80px
+const maxDim = Math.max(widthMm, heightMm);
+const scale  = 80 / maxDim;
+const previewW = widthMm * scale;
+const previewH = heightMm * scale;
+
+const borderRadius: Record<string, string> = {
+  rect:   "4px",
+  circle: "50%",
+  oval:   "50% / 40%",
+};
+const radius = borderRadius[shape] ?? "4px";
+
+const href = `/${object.category}/${object.slug}`;
+---
+
+<a href={href} class="obj-card glow-on-hover" title={`See ${object.name} at actual size`}>
+  <!-- Mini preview (not actual size) -->
+  <div class="obj-card__preview">
+    <div
+      class="obj-card__shape"
+      style={`
+        width: ${previewW}px;
+        height: ${previewH}px;
+        background-color: ${color};
+        border-color: ${borderColor ?? color};
+        border-radius: ${radius};
+      `}
+      aria-hidden="true"
+    ></div>
+  </div>
+
+  <!-- Info -->
+  <div class="obj-card__info">
+    <h3 class="obj-card__name">{object.name}</h3>
+    <p class="obj-card__dims">{dimLabel}</p>
+    <span class="obj-card__cta">See actual size →</span>
+  </div>
+</a>
+
+<style>
+  .obj-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-radius: var(--radius-md);
+    border: 1px solid hsl(var(--border-color-hsl));
+    background-color: hsl(var(--bg-secondary-hsl));
+    text-decoration: none;
+    overflow: hidden;
+    transition: var(--transition-smooth);
+  }
+
+  .obj-card:hover {
+    border-color: hsla(var(--accent-hsl), 0.4);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Preview area — checkerboard background for transparency */
+  .obj-card__preview {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: hsla(var(--bg-primary-hsl), 0.7);
+    background-image:
+      linear-gradient(45deg, hsl(var(--border-color-hsl)) 25%, transparent 25%),
+      linear-gradient(-45deg, hsl(var(--border-color-hsl)) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, hsl(var(--border-color-hsl)) 75%),
+      linear-gradient(-45deg, transparent 75%, hsl(var(--border-color-hsl)) 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    background-blend-mode: multiply;
+    opacity: 0.9;
+  }
+
+  :root.dark .obj-card__preview {
+    background-blend-mode: screen;
+    opacity: 0.7;
+  }
+
+  .obj-card__shape {
+    border: 2px solid;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+
+  /* Info section */
+  .obj-card__info {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .obj-card__name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: hsl(var(--text-primary-hsl));
+    line-height: 1.3;
+  }
+
+  .obj-card__dims {
+    font-size: 0.78rem;
+    color: hsl(var(--text-secondary-hsl));
+    font-weight: 500;
+  }
+
+  .obj-card__cta {
+    font-size: 0.78rem;
+    color: hsl(var(--accent-hsl));
+    font-weight: 600;
+    margin-top: 6px;
+    transition: var(--transition-quick);
+  }
+
+  .obj-card:hover .obj-card__cta {
+    letter-spacing: 0.02em;
+  }
+</style>

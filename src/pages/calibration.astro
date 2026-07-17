@@ -1,0 +1,214 @@
+---
+import BaseLayout from "../components/layout/BaseLayout.astro";
+import CalibrationBar from "../components/core/CalibrationBar.astro";
+import ActualSizeViewer from "../components/core/ActualSizeViewer.astro";
+import { buildWebAppJsonLd, SITE_URL } from "../lib/seo";
+import { getObjectBySlug } from "../lib/objectUtils";
+
+const title = "How to Calibrate Your Screen | ActualSize";
+const description = "Step-by-step guide to calibrating your screen for accurate actual-size display. Use a credit card, coin, or monitor size to get precise DPI calibration.";
+const canonicalUrl = `${SITE_URL}/calibration`;
+
+// Show credit card in the example
+const creditCard = getObjectBySlug("standard-credit-card");
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+>
+  <CalibrationBar />
+
+  <div class="cal-guide-page">
+    <div class="container">
+
+      <header class="cal-guide-page__header">
+        <h1>How to Calibrate Your Screen</h1>
+        <p class="cal-guide-page__intro">
+          Calibration measures your screen's pixel density (DPI) so we can display
+          objects at their true physical size. It takes about 10 seconds and only needs to be done once.
+        </p>
+      </header>
+
+      <div class="cal-guide-page__methods">
+
+        <!-- Method 1 -->
+        <div class="cal-method-card glass glow-on-hover">
+          <div class="cal-method-card__header">
+            <span class="cal-method-card__num">01</span>
+            <div>
+              <h2 class="cal-method-card__title">💳 Credit Card — Most Accurate</h2>
+              <p class="cal-method-card__sub">Recommended — works for any standard bank card or ID card</p>
+            </div>
+          </div>
+          <ol class="cal-method-card__steps">
+            <li>Click <strong>Calibrate Screen</strong> in the bar above</li>
+            <li>Place your credit card flat against your screen</li>
+            <li>Drag the right edge of the blue guide to match your card's width exactly</li>
+            <li>Click <strong>Apply This Calibration</strong></li>
+          </ol>
+          <div class="cal-method-card__why">
+            <strong>Why this works:</strong> All standard credit cards are exactly 85.60 mm wide
+            (ISO/IEC 7810 ID-1). Matching pixels to this known size gives us your exact DPI.
+          </div>
+        </div>
+
+        <!-- Method 2 -->
+        <div class="cal-method-card glass glow-on-hover">
+          <div class="cal-method-card__header">
+            <span class="cal-method-card__num">02</span>
+            <div>
+              <h2 class="cal-method-card__title">🖥️ Monitor Size</h2>
+              <p class="cal-method-card__sub">Useful if you don't have a card available</p>
+            </div>
+          </div>
+          <ol class="cal-method-card__steps">
+            <li>Find your monitor's diagonal size (usually printed on the box or in specs)</li>
+            <li>Click <strong>Calibrate Screen</strong> above</li>
+            <li>Switch to the <strong>Monitor Size</strong> tab</li>
+            <li>Enter your diagonal size in inches and click Apply</li>
+          </ol>
+          <div class="cal-method-card__why">
+            <strong>Note:</strong> May be less accurate on HiDPI/Retina displays due to CSS pixel scaling.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FAQ -->
+      <section class="cal-guide-page__faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <details class="accordion-details">
+          <summary class="accordion-summary">Is the calibration stored permanently?</summary>
+          <div class="accordion-content">
+            Yes — your calibration is saved to your browser's localStorage. It persists across
+            visits until you reset it or clear your browser data. If you use a different browser
+            or device, you'll need to calibrate again.
+          </div>
+        </details>
+
+        <details class="accordion-details">
+          <summary class="accordion-summary">Why is my phone the wrong size?</summary>
+          <div class="accordion-content">
+            Mobile browsers scale CSS pixels independently of physical pixels.
+            Calibrating on a phone with a credit card gives the best result.
+            Monitor diagonal input is not recommended on phones.
+          </div>
+        </details>
+
+        <details class="accordion-details">
+          <summary class="accordion-summary">What DPI should my screen be?</summary>
+          <div class="accordion-content">
+            Common values: 96 DPI (standard HD monitors), 109 DPI (27" 1080p),
+            163 DPI (standard Retina MacBook), 227 DPI (5K iMac).
+            Your DPI is shown in the calibration bar after calibrating.
+          </div>
+        </details>
+
+        <details class="accordion-details">
+          <summary class="accordion-summary">Can I use any card for calibration?</summary>
+          <div class="accordion-content">
+            Yes — any standard credit card, debit card, driver's license, or government ID card.
+            All follow the ISO 7810 ID-1 standard: exactly 85.60 × 53.98 mm.
+          </div>
+        </details>
+      </section>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .cal-guide-page {
+    padding: 40px 0 80px;
+  }
+
+  .cal-guide-page__header {
+    max-width: 680px;
+    margin-bottom: 48px;
+  }
+
+  .cal-guide-page__header h1 {
+    margin-bottom: 16px;
+  }
+
+  .cal-guide-page__intro {
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .cal-guide-page__methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 60px;
+  }
+
+  .cal-method-card {
+    border-radius: var(--radius-md);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cal-method-card__header {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .cal-method-card__num {
+    font-size: 2rem;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .cal-method-card__title {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  .cal-method-card__sub {
+    font-size: 0.85rem;
+  }
+
+  .cal-method-card__steps {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cal-method-card__steps li {
+    font-size: 0.95rem;
+    color: hsl(var(--text-secondary-hsl));
+    line-height: 1.5;
+  }
+
+  .cal-method-card__why {
+    font-size: 0.85rem;
+    padding: 12px 16px;
+    background: hsla(var(--accent-hsl), 0.06);
+    border-left: 3px solid hsl(var(--accent-hsl));
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: hsl(var(--text-secondary-hsl));
+    line-height: 1.5;
+  }
+
+  .cal-guide-page__faq {
+    max-width: 720px;
+  }
+
+  .cal-guide-page__faq h2 {
+    margin-bottom: 24px;
+    font-size: 1.4rem;
+  }
+</style>

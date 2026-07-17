@@ -1,0 +1,611 @@
+# Actual Size on Screen — V1 Core Engine Implementation Plan
+
+> **Scope**: Build the best possible Actual Size Engine. Nothing else.
+> **Strategy**: Incremental replacement — existing template stays live until new engine is proven.
+
+---
+
+## What V1 Delivers
+
+| ✅ In Scope | ❌ Deferred to V2 |
+|---|---|
+| Calibration system (3 methods) | Search |
+| Rendering engine (CSS-variable driven) | User contributions |
+| Object data structure + TypeScript schema | Ads/monetisation |
+| Dynamic routes for categories + objects | Comparison mode |
+| Reusable `ActualSizeViewer` component | API endpoints |
+| SEO: titles, JSON-LD, sitemap | Brand/domain changes |
+| Performance: 95+ Lighthouse | Social features |
+| 3 starter data sets (~30 objects) | 100+ objects |
+
+---
+
+## Incremental Replacement Strategy
+
+Existing files are **never deleted** in V1. New components are built alongside them. The homepage is updated last, only after the engine is proven working in isolation.
+
+```
+Phase A: Build engine in isolation (new files only, no existing file touched)
+Phase B: Wire engine into a single test route (/test)
+Phase C: Build real routes ([category], [category]/[slug])
+Phase D: Replace homepage last
+```
+
+---
+
+## 1. Object Data Structure
+
+### Design Principles
+- **Canonical unit = millimeters.** Every object stores dimensions in `mm`. The engine converts to pixels at render time. No unit ambiguity, ever.
+- **One JSON file per category.** Easy to add, diff, and review in Git.
+- **Every field is typed.** A TypeScript schema validates data at build time.
+
+### TypeScript Schema
+
+```typescript
+// src/data/schema.ts
+
+export type ObjectShape = "rect" | "circle" | "oval";
+export type ObjectCategory =
+  | "coins" | "credit-cards" | "paper" | "phones"
+  | "monitors" | "lumber" | "keys" | "cards";
+
+export interface ObjectDimensions {
+  widthMm: number;       // physical width in millimeters
+  heightMm: number;      // physical height in millimeters
+  shape: ObjectShape;    // determines border-radius logic
+  depthMm?: number;      // optional, for reference only (not rendered)
+}
+
+export interface ObjectDisplay {
+  color: string;          // "#c0c0c0" — fill when no image
+  borderColor?: string;   // outline color
+  image?: string;         // "/images/objects/coins/us-quarter.webp"
+  imageAlt?: string;
+  showRulerOverlay?: boolean;  // draws tick marks on rendered object
+}
+
+export interface ObjectMeta {
+  title: string;          // "US Quarter Actual Size"
+  description: string;    // ~155 chars for meta description
+  h1: string;             // "US Quarter — See It at Actual Size"
+  facts: string[];        // 3–5 bullet facts shown on object page
+  relatedSlugs: string[]; // slugs of related objects for internal links
+  source?: string;        // citation URL for the dimensions
+  updatedAt: string;      // ISO date "2025-01-15"
+}
+
+export interface ActualSizeObject {
+  id: string;             // "us-quarter" — globally unique
+  slug: string;           // "us-quarter" — matches id, used in URL
+  name: string;           // "US Quarter"
+  category: ObjectCategory;
+  tags: string[];
+  dimensions: ObjectDimensions;
+  display: ObjectDisplay;
+  meta: ObjectMeta;
+}
+
+export interface Category {
+  id: ObjectCategory;
+  slug: string;
+  name: string;
+  icon: string;           // single emoji
+  description: string;    // 1–2 sentences
+  metaTitle: string;
+  metaDescription: string;
+}
+```
+
+### Sample Data (coins.json)
+
+```json
+[
+  {
+    "id": "us-quarter",
+    "slug": "us-quarter",
+    "name": "US Quarter",
+    "category": "coins",
+    "tags": ["usa", "currency", "silver"],
+    "dimensions": {
+      "widthMm": 24.26,
+      "heightMm": 24.26,
+      "shape": "circle"
+    },
+    "display": {
+      "color": "#c8c8c8",
+      "borderColor": "#999",
+      "image": "/images/objects/coins/us-quarter.webp",
+      "imageAlt": "US Quarter coin at actual size"
+    },
+    "meta": {
+      "title": "US Quarter Actual Size — See It on Your Screen",
+      "description": "See a US Quarter (24.26 mm) displayed at its true physical size on your screen. Calibrate once and compare any coin instantly.",
+      "h1": "US Quarter — Actual Size on Screen",
+      "facts": [
+        "Diameter: 24.26 mm (0.955 inches)",
+        "Composition: 91.67% copper, 8.33% nickel",
+        "Weight: 5.67 grams",
+        "Introduced: 1796"
+      ],
+      "relatedSlugs": ["us-dime", "us-penny", "us-nickel"],
+      "source": "https://www.usmint.gov/learn/coin-and-medal-programs/coin-specifications",
+      "updatedAt": "2025-01-15"
+    }
+  }
+]
+```
+
+---
+
+## 2. Calibration System
+
+### Architecture
+
+The calibration system is split into two files:
+
+| File | Runs where | Purpose |
+|---|---|---|
+| `src/lib/calibration.ts` | Build-time (Node) | Math helpers, type definitions |
+| `src/scripts/calibration-engine.ts` | Browser (ES module) | DPI detection, localStorage, DOM events |
+
+### The Math
+
+```
+pixels_per_mm = DPI / 25.4
+object_width_px = widthMm * pixels_per_mm
+```
+
+For a 24.26 mm coin at 96 DPI: `24.26 × (96 / 25.4) = 91.7 px`
+
+### Three Calibration Methods
+
+#### Method 1: Credit Card (Most Accurate — Default)
+- Standard credit card is **85.60 mm × 53.98 mm** (ISO/IEC 7810 ID-1)
+- User places physical card on screen and drags a guide box to match
+- DPI is computed from the guide's pixel width: `dpi = (guidePx / 85.60) * 25.4`
+- **Why first**: Nearly everyone has a credit card. Zero additional input needed.
+
+#### Method 2: Known Object / Coin
+- Dropdown of known objects (US Quarter = 24.26 mm, Euro = 23.25 mm, etc.)
+- Same drag-to-match UI as Method 1 but for circular coins
+- Useful when users don't have a card handy
+
+#### Method 3: Monitor Diagonal (Fallback)
+- User enters their monitor's diagonal size in inches
+- Browser reads `screen.width` × `screen.height` in CSS pixels
+- DPI = `√(screen.width² + screen.height²) / diagonalInches`
+- Least accurate due to HiDPI scaling, but widely applicable
+
+### Calibration State Machine
+
+```typescript
+// State stored in localStorage key: "actualsize:calibration"
+interface CalibrationState {
+  dpi: number;
+  method: "credit-card" | "coin" | "monitor" | "default";
+  calibratedAt: string;   // ISO timestamp
+  confidence: "high" | "medium" | "low";
+}
+
+// Default when no calibration exists
+const DEFAULT_STATE: CalibrationState = {
+  dpi: 96,
+  method: "default",
+  calibratedAt: new Date().toISOString(),
+  confidence: "low",
+};
+```
+
+### The CSS Variable Bridge (Key Architectural Decision)
+
+When calibration completes, the engine does **one single DOM write**:
+
+```typescript
+document.documentElement.style.setProperty('--dpi', String(newDPI));
+```
+
+This single write instantly reflows **every** `ActualSizeViewer` on the page via CSS `calc()`. No React state, no component re-renders, no event listeners in each object component. This is the entire "reactivity" of the system.
+
+### Calibration Event
+
+```typescript
+// Dispatched on window after DPI is updated
+window.dispatchEvent(new CustomEvent('calibration:updated', {
+  detail: { dpi: number, method: string, confidence: string }
+}));
+```
+
+The `CalibrationBar` listens to this to update its UI label ("Calibrated ✓").
+
+---
+
+## 3. Rendering Engine (`ActualSizeViewer.astro`)
+
+### How It Renders
+
+1. **At build time**: The component receives the object's `widthMm` and `heightMm` as data attributes. It renders with a CSS fallback of `--dpi: 96`.
+2. **At runtime**: The calibration engine sets `--dpi` on `:root`. CSS `calc()` recalculates all object dimensions instantly.
+3. **No JavaScript inside this component.** It is a pure, zero-JS Astro component.
+
+### CSS Rendering Formula
+
+```css
+.actual-size-object {
+  --px-per-mm: calc(var(--dpi, 96) / 25.4);
+  width:  calc(var(--obj-w) * var(--px-per-mm) * 1px);
+  height: calc(var(--obj-h) * var(--obj-h-mm) * var(--px-per-mm) * 1px);
+}
+```
+
+The `--obj-w` and `--obj-h` custom properties are set inline on the element via Astro:
+
+```astro
+<div
+  class="actual-size-object"
+  style={`--obj-w: ${object.dimensions.widthMm}; --obj-h: ${object.dimensions.heightMm};`}
+>
+```
+
+### Shape Rendering
+
+| Shape | CSS output |
+|---|---|
+| `rect` | `border-radius: 4px` (slight rounding for realism) |
+| `circle` | `border-radius: 50%` |
+| `oval` | `border-radius: 50% / 40%` |
+
+### Component Props Interface
+
+```astro
+---
+interface Props {
+  object: ActualSizeObject;
+  showLabel?: boolean;        // show name + dimensions below object
+  showRulerOverlay?: boolean; // draw mm tick marks on edges
+  class?: string;             // pass-through CSS class
+}
+---
+```
+
+### Progressive Enhancement
+
+- **No JS**: Object renders at 96 DPI by default. Still useful.
+- **With calibration**: Object resizes to true physical size.
+- **With image**: Photo is displayed at actual size over the colored fill.
+
+---
+
+## 4. Page Templates
+
+### BaseLayout.astro
+
+All pages extend this. It handles:
+- `<head>` with all SEO meta tags
+- Google Fonts (`Inter`) with `display=swap`
+- Global CSS (`tokens.css`, `global.css`)
+- The calibration engine script (loaded as `type="module"`, deferred)
+- The `CalibrationBar` (sticky, always on screen)
+
+```astro
+---
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  jsonLd?: object;          // Schema.org structured data
+  breadcrumbs?: { name: string; url: string }[];
+}
+---
+```
+
+### Object Page Template (`[category]/[slug].astro`)
+
+Content order:
+
+```
+[Header]
+[BreadcrumbNav]          ← visual + schema markup
+[CalibrationBar]         ← sticky
+────────────────────────
+[h1: Object Name]
+[ActualSizeViewer]       ← the object at real size, center stage
+[Dimensions Table]       ← mm | cm | inches | comparison
+────────────────────────
+[Facts section]
+[Related Objects row]    ← 3–4 ObjectCards
+────────────────────────
+[SEO content block]      ← 200–400 words, keyword-rich
+[FAQ block]              ← FAQ schema markup
+[Footer]
+```
+
+### Category Page Template (`[category]/index.astro`)
+
+```
+[Header]
+[CalibrationBar]
+[Category Hero h1]
+[ObjectCard grid]        ← all objects in category
+[SEO content]
+[Footer]
+```
+
+### Homepage (`index.astro`)
+
+```
+[Header]
+[CalibrationBar]
+[Hero]                   ← "See Anything at Real Size"
+[Featured viewer]        ← credit card displayed immediately at actual size
+[Category tabs]
+[ObjectCard grid]        ← all objects, filterable client-side
+[SEO content]
+[FAQ]
+[Footer]
+```
+
+---
+
+## 5. SEO Architecture
+
+### Principle: Every page is unique, keyword-specific, and schema-marked.
+
+### URL Structure
+
+```
+/                          → Homepage (target: "actual size on screen")
+/[category]/               → /coins, /paper, /phones
+/[category]/[slug]         → /coins/us-quarter, /paper/a4
+/calibration               → Calibration guide (target: "how to calibrate screen")
+/sitemap.xml               → Auto-generated
+/robots.txt                → Auto-generated
+```
+
+### Per-Object SEO
+
+Every object page gets:
+
+| SEO element | Formula |
+|---|---|
+| `<title>` | `${object.meta.title} \| ActualSize` |
+| `<meta description>` | `object.meta.description` (max 155 chars, stored in JSON) |
+| `<h1>` | `object.meta.h1` (stored in JSON, human-written per object) |
+| `og:title` | Same as `<title>` |
+| `og:description` | Same as `<meta description>` |
+| `og:image` | `/og/${category}/${slug}.png` (static, pre-generated) |
+| `canonical` | Absolute URL of the page |
+| `article:modified_time` | `object.meta.updatedAt` |
+
+### JSON-LD Structured Data
+
+**Object pages** — `Product` schema (best match for SEO; signals dimensions as product specs):
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "US Quarter",
+  "description": "...",
+  "image": "...",
+  "offers": { "@type": "Offer", "availability": "https://schema.org/InStock" },
+  "additionalProperty": [
+    { "@type": "PropertyValue", "name": "Width", "value": "24.26 mm" },
+    { "@type": "PropertyValue", "name": "Height", "value": "24.26 mm" }
+  ]
+}
+```
+
+**Homepage** — `WebApplication` + `FAQPage`:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Actual Size on Screen",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any"
+}
+```
+
+**Category pages** — `CollectionPage`:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Coins at Actual Size",
+  "description": "..."
+}
+```
+
+**All pages** — `BreadcrumbList`:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "/" },
+    { "@type": "ListItem", "position": 2, "name": "Coins", "item": "/coins" },
+    { "@type": "ListItem", "position": 3, "name": "US Quarter", "item": "/coins/us-quarter" }
+  ]
+}
+```
+
+### Sitemap Strategy
+
+`src/pages/sitemap.xml.ts` dynamically generates entries for:
+- All category pages (priority 0.8)
+- All object pages (priority 0.6, `<lastmod>` from `updatedAt`)
+- Static pages: home (1.0), calibration (0.7)
+
+Requires `@astrojs/sitemap` integration + `site` set in `astro.config.mjs`.
+
+### Internal Linking Map
+
+```
+Homepage → all Category pages (footer nav + category tabs)
+Category → all its Object pages (grid)
+Object → 3–5 related objects (relatedSlugs field)
+Object → its Category page (breadcrumb)
+```
+
+Every object page has at least 5 inbound internal links by the time we have 30+ objects.
+
+---
+
+## 6. Performance Architecture
+
+### JavaScript Budget
+
+| Script | Size | How loaded |
+|---|---|---|
+| `calibration-engine.ts` | < 6 KB (minified) | `type="module"` deferred |
+| Everything else | 0 KB | Pure Astro/HTML/CSS |
+
+**Total JS shipped to browser: < 6 KB.** This is non-negotiable.
+
+### CSS Strategy
+
+- All design tokens in `tokens.css` (loaded once via `BaseLayout`)
+- No CSS-in-JS, no Tailwind JIT overhead
+- Component styles are scoped via Astro's built-in `<style>` isolation
+- Critical CSS is inlined by Astro's build step automatically
+
+### Image Strategy
+
+- Object images: `WebP` format, sized to max render dimension + 2× for retina
+- `<img loading="lazy">` on all below-fold images
+- `<img decoding="async">` on all images
+- `width` and `height` attributes set on every `<img>` to prevent layout shift (CLS = 0)
+
+### Font Strategy
+
+```html
+<!-- Preconnect first -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Load only the weights we use -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+```
+
+### Build Output
+
+Every page renders to a `.html` file. No SSR server, no edge functions needed. Deployable to any CDN in one command.
+
+### Lighthouse Targets
+
+| Metric | Target |
+|---|---|
+| Performance | ≥ 95 |
+| Accessibility | ≥ 95 |
+| Best Practices | 100 |
+| SEO | 100 |
+| LCP | < 1.5s |
+| CLS | 0 |
+| FID/INP | < 50ms |
+
+---
+
+## New File Inventory (V1 Only)
+
+### New Files (no existing files deleted)
+
+```
+src/data/
+  schema.ts
+  categories.json
+  objects/
+    coins.json          (~10 objects)
+    credit-cards.json   (~5 objects)
+    paper.json          (~8 objects: A4, A3, Letter, Legal, Tabloid…)
+
+src/lib/
+  calibration.ts        (build-time math helpers)
+  rendering.ts          (unit conversion utilities)
+  objectUtils.ts        (filter, sort, slug, getByCategory)
+  seo.ts                (title/description generators)
+
+src/scripts/
+  calibration-engine.ts (the ONLY client-side JS file)
+
+src/components/core/
+  ActualSizeViewer.astro
+  CalibrationBar.astro
+  ObjectCard.astro
+  UnitToggle.astro
+
+src/components/seo/
+  OpenGraph.astro
+  SchemaOrg.astro
+  BreadcrumbNav.astro
+
+src/components/layout/
+  BaseLayout.astro       (new, wraps all new pages)
+
+src/pages/
+  [category]/
+    index.astro          (category landing)
+    [slug].astro         (object detail)
+  calibration.astro      (calibration guide page)
+  sitemap.xml.ts
+  robots.txt.ts
+```
+
+### Modified Files (incremental, no deletion)
+
+```
+src/config.ts            → update keywords + description only
+astro.config.mjs         → add @astrojs/sitemap, set site URL
+src/styles/tokens.css    → add new design tokens alongside existing
+package.json             → add @astrojs/sitemap
+```
+
+### Preserved Files (untouched until Phase D)
+
+```
+src/pages/index.astro          ← old homepage stays live
+src/components/Ruler.astro     ← preserved
+src/components/Welcome.astro   ← preserved
+src/components/Header.astro    ← preserved until replaced
+src/components/Footer.astro    ← preserved until replaced
+```
+
+---
+
+## Execution Order
+
+```
+Step 1  src/data/schema.ts                       (TypeScript types)
+Step 2  src/data/categories.json                 (category registry)
+Step 3  src/data/objects/coins.json etc.         (starter data)
+Step 4  src/lib/*.ts                             (utility layer)
+Step 5  src/scripts/calibration-engine.ts        (browser engine)
+Step 6  src/styles/tokens.css updates            (design system)
+Step 7  src/components/layout/BaseLayout.astro   (page wrapper)
+Step 8  src/components/core/CalibrationBar.astro (calibration UI)
+Step 9  src/components/core/ActualSizeViewer.astro
+Step 10 src/components/core/ObjectCard.astro
+Step 11 src/components/seo/*.astro               (SEO components)
+Step 12 src/pages/[category]/[slug].astro        (object pages)
+Step 13 src/pages/[category]/index.astro         (category pages)
+Step 14 src/pages/calibration.astro
+Step 15 src/pages/sitemap.xml.ts + robots.txt.ts
+Step 16 src/pages/index.astro                    (homepage — last)
+```
+
+---
+
+## Verification Plan
+
+| Test | Method |
+|---|---|
+| Calibration accuracy | Physical credit card on known-DPI monitor (Dell 27" = 109 DPI) |
+| Object render size | Ruler on screen against rendered coin |
+| Build success | `astro build` — zero errors |
+| Dynamic routes | All 23+ objects generate HTML files |
+| Sitemap | `/sitemap.xml` lists all object URLs |
+| Lighthouse | Dev tools audit on object page and homepage |
+| CLS = 0 | All images have explicit `width`/`height` |
+| JS bundle | Network tab: only one `.js` file < 6 KB |

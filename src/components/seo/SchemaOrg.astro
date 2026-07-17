@@ -1,0 +1,14 @@
+---
+/**
+ * SchemaOrg — Renders JSON-LD structured data in a <script> tag.
+ * Pass one or more schema objects; each gets its own tag.
+ */
+interface Props {
+  schemas: object | object[];
+}
+const { schemas } = Astro.props;
+const schemaArray = Array.isArray(schemas) ? schemas : [schemas];
+---
+{schemaArray.map((schema) => (
+  <script type="application/ld+json" set:html={JSON.stringify(schema, null, 0)} />
+))}

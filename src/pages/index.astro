@@ -1,0 +1,432 @@
+---
+import BaseLayout from "../components/layout/BaseLayout.astro";
+import { siteConfig } from "../config";
+import { buildWebAppJsonLd } from "../lib/seo";
+---
+
+<BaseLayout
+  title={siteConfig.title}
+  description={siteConfig.description}
+  jsonLd={buildWebAppJsonLd()}
+>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <span class="hero__badge">Real Size. Real Simple.</span>
+      <h1 class="hero__title">
+        See Anything at <span class="gradient-text">Actual Size</span> on Your Screen
+      </h1>
+      <p class="hero__subtitle">
+        Calibrate your display once, then browse hundreds of everyday objects —
+        credit cards, coins, paper, phones, and more — shown at their true
+        physical size. No ruler needed.
+      </p>
+      <div class="hero__actions">
+        <a href="/calibration" class="btn btn-primary active-shrink">
+          Start Calibration
+        </a>
+        <a href="#how-it-works" class="btn btn-secondary active-shrink">
+          How It Works
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Objects -->
+  <section class="popular-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Popular Objects</h2>
+        <p>See how common items compare at actual size.</p>
+      </div>
+      <div class="popular-grid">
+        <article class="popular-card glass glow-on-hover">
+          <div class="popular-card__preview">
+            <div class="popular-card__shape" style="width:80px;height:50px;border-radius:4px;background:hsl(210,10%,85%);border:2px solid hsl(210,10%,70%);"></div>
+          </div>
+          <div class="popular-card__info">
+            <h3 class="popular-card__name">Credit Card</h3>
+            <p class="popular-card__dims">85.60 × 53.98 mm</p>
+          </div>
+        </article>
+        <article class="popular-card glass glow-on-hover">
+          <div class="popular-card__preview">
+            <div class="popular-card__shape" style="width:80px;height:42px;border-radius:4px;background:hsl(100,40%,75%);border:2px solid hsl(100,40%,55%);"></div>
+          </div>
+          <div class="popular-card__info">
+            <h3 class="popular-card__name">US Dollar Bill</h3>
+            <p class="popular-card__dims">156 × 66.3 mm</p>
+          </div>
+        </article>
+        <article class="popular-card glass glow-on-hover">
+          <div class="popular-card__preview">
+            <div class="popular-card__shape" style="width:38px;height:76px;border-radius:8px;background:hsl(0,0%,15%);border:2px solid hsl(0,0%,30%);"></div>
+          </div>
+          <div class="popular-card__info">
+            <h3 class="popular-card__name">iPhone 15 Pro</h3>
+            <p class="popular-card__dims">70.6 × 146.6 mm</p>
+          </div>
+        </article>
+        <article class="popular-card glass glow-on-hover">
+          <div class="popular-card__preview">
+            <div class="popular-card__shape" style="width:76px;height:54px;border-radius:2px;background:hsl(0,0%,95%);border:2px solid hsl(0,0%,80%);"></div>
+          </div>
+          <div class="popular-card__info">
+            <h3 class="popular-card__name">A6 Postcard</h3>
+            <p class="popular-card__dims">148 × 105 mm</p>
+          </div>
+        </article>
+        <article class="popular-card glass glow-on-hover">
+          <div class="popular-card__preview">
+            <div class="popular-card__shape" style="width:68px;height:68px;border-radius:50%;background:hsl(39,100%,55%);border:2px solid hsl(39,100%,40%);"></div>
+          </div>
+          <div class="popular-card__info">
+            <h3 class="popular-card__name">US Quarter</h3>
+            <p class="popular-card__dims">⌀ 24.26 mm</p>
+          </div>
+        </article>
+        <article class="popular-card glass glow-on-hover">
+          <div class="popular-card__preview">
+            <div class="popular-card__shape" style="width:36px;height:100px;border-radius:6px;background:hsl(200,60%,55%);border:2px solid hsl(200,60%,40%);"></div>
+          </div>
+          <div class="popular-card__info">
+            <h3 class="popular-card__name">Soda Can</h3>
+            <p class="popular-card__dims">⌀ 66 × 115 mm</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="how-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>How It Works</h2>
+        <p>Three simple steps to measure anything at real size.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card glass">
+          <span class="step-number">01</span>
+          <h3 class="step-title">Calibrate Your Screen</h3>
+          <p class="step-desc">
+            Place a credit card against your screen and match the guides.
+            Your pixel density is saved automatically — only need to do it once.
+          </p>
+        </div>
+        <div class="step-card glass">
+          <span class="step-number">02</span>
+          <h3 class="step-title">Browse Objects</h3>
+          <p class="step-desc">
+            Explore our catalog of coins, cards, paper sizes, phones,
+            currency, and more — all with precise physical dimensions.
+          </p>
+        </div>
+        <div class="step-card glass">
+          <span class="step-number">03</span>
+          <h3 class="step-title">See Real Size</h3>
+          <p class="step-desc">
+            Each object is rendered at its exact size on your calibrated
+            screen. Compare, measure, or just satisfy your curiosity.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="accordion-details">
+          <summary class="accordion-summary">Is this website free to use?</summary>
+          <div class="accordion-content">
+            Yes, completely free. No sign-ups, no accounts, no hidden fees.
+            Everything runs in your browser.
+          </div>
+        </details>
+        <details class="accordion-details">
+          <summary class="accordion-summary">How accurate is the actual-size display?</summary>
+          <div class="accordion-content">
+            Once calibrated, accuracy depends on how precisely you matched the
+            calibration guide. With a credit card, most screens achieve better
+            than 1&nbsp;mm accuracy.
+          </div>
+        </details>
+        <details class="accordion-details">
+          <summary class="accordion-summary">Do I need to calibrate every visit?</summary>
+          <div class="accordion-content">
+            No — your calibration is saved in your browser and persists across
+            sessions. Only recalibrate if you switch to a different display or
+            clear your browser data.
+          </div>
+        </details>
+        <details class="accordion-details">
+          <summary class="accordion-summary">Does it work on phones and tablets?</summary>
+          <div class="accordion-content">
+            Yes, but mobile browsers scale CSS pixels independently of physical
+            pixels. For best results, calibrate with a credit card on your
+            phone or tablet.
+          </div>
+        </details>
+        <details class="accordion-details">
+          <summary class="accordion-summary">What can I measure with this tool?</summary>
+          <div class="accordion-content">
+            Anything in our object catalog: coins, banknotes, credit cards,
+            paper sizes, phones, tablets, screen dimensions, and more.
+            New objects are added regularly.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ── Hero ───────────────────────────────────────────── */
+  .hero {
+    padding: 100px 0 80px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 20%, hsla(var(--accent-hsl), 0.05) 0%, transparent 65%);
+  }
+
+  .hero__inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .hero__badge {
+    background-color: hsla(var(--accent-hsl), 0.1);
+    color: hsl(var(--accent-hsl));
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid hsla(var(--accent-hsl), 0.2);
+  }
+
+  .hero__title {
+    margin: 0;
+  }
+
+  .hero__subtitle {
+    max-width: 580px;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .hero__actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  /* ── Shared Section Header ─────────────────────────── */
+  .section-header {
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto 40px;
+  }
+
+  .section-header h2 {
+    margin-bottom: 10px;
+  }
+
+  .section-header p {
+    font-size: 1.05rem;
+  }
+
+  /* ── Popular Objects ───────────────────────────────── */
+  .popular-section {
+    padding: 20px 0 60px;
+  }
+
+  .popular-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+  }
+
+  .popular-card {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    text-decoration: none;
+    cursor: default;
+    transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .popular-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .popular-card__preview {
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: hsla(var(--bg-primary-hsl), 0.7);
+    background-image:
+      linear-gradient(45deg, hsl(var(--border-color-hsl)) 25%, transparent 25%),
+      linear-gradient(-45deg, hsl(var(--border-color-hsl)) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, hsl(var(--border-color-hsl)) 75%),
+      linear-gradient(-45deg, transparent 75%, hsl(var(--border-color-hsl)) 75%);
+    background-size: 14px 14px;
+    background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
+    background-blend-mode: multiply;
+    opacity: 0.85;
+  }
+
+  :root.dark .popular-card__preview {
+    background-blend-mode: screen;
+    opacity: 0.65;
+  }
+
+  .popular-card__shape {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    flex-shrink: 0;
+  }
+
+  .popular-card__info {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .popular-card__name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .popular-card__dims {
+    font-size: 0.78rem;
+    color: hsl(var(--text-secondary-hsl));
+    font-weight: 500;
+  }
+
+  /* ── How It Works ──────────────────────────────────── */
+  .how-section {
+    padding: 40px 0 80px;
+    background: radial-gradient(ellipse at bottom, hsla(var(--accent-hsl), 0.03) 0%, transparent 60%);
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  .step-card {
+    padding: 32px 28px;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: var(--transition-smooth);
+    border: 1px solid hsl(var(--border-color-hsl));
+  }
+
+  .step-card:hover {
+    border-color: hsla(var(--accent-hsl), 0.3);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .step-number {
+    font-size: 2rem;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .step-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .step-desc {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: hsl(var(--text-secondary-hsl));
+  }
+
+  /* ── FAQ ───────────────────────────────────────────── */
+  .faq-section {
+    padding: 20px 0 80px;
+  }
+
+  .faq-list {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* ── Reused btn styles (local dup to avoid relying on old classes) ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 26px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: var(--transition-quick);
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent-gradient);
+    color: white;
+    box-shadow: 0 4px 14px hsla(var(--accent-hsl), 0.35);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px hsla(var(--accent-hsl), 0.45);
+    color: white;
+  }
+
+  .btn-secondary {
+    background-color: hsl(var(--bg-secondary-hsl));
+    border: 1px solid hsl(var(--border-color-hsl));
+    color: hsl(var(--text-primary-hsl));
+  }
+
+  .btn-secondary:hover {
+    background-color: hsla(var(--border-color-hsl), 0.2);
+    color: hsl(var(--text-primary-hsl));
+  }
+
+  @media (max-width: 600px) {
+    .hero {
+      padding: 60px 0 50px;
+    }
+    .hero__actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    .hero__actions .btn {
+      width: 100%;
+    }
+    .popular-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

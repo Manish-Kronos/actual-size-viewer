@@ -1,0 +1,95 @@
+[
+  {
+    "id": "us-quarter",
+    "slug": "us-quarter",
+    "name": "US Quarter",
+    "category": "coins",
+    "tags": ["usa", "25-cents", "silver", "washington", "currency"],
+    "dimensions": {
+      "widthMm": 24.26,
+      "heightMm": 24.26,
+      "shape": "circle"
+    },
+    "display": {
+      "color": "#c8c8c8",
+      "borderColor": "#a0a0a0"
+    },
+    "meta": {
+      "title": "US Quarter Actual Size — See It on Your Screen",
+      "description": "See a US Quarter (24.26 mm diameter) at its true physical size on your screen. Calibrate once with a credit card for perfect accuracy.",
+      "h1": "US Quarter — Actual Size on Screen",
+      "facts": [
+        "Diameter: 24.26 mm (0.955 inches)",
+        "Thickness: 1.75 mm",
+        "Composition: 91.67% copper, 8.33% nickel clad",
+        "Weight: 5.670 grams",
+        "Edge: 119 reeds"
+      ],
+      "relatedSlugs": ["us-penny", "us-dime", "euro-1"],
+      "source": "https://www.usmint.gov/learn/coin-and-medal-programs/coin-specifications",
+      "updatedAt": "2025-01-15"
+    }
+  },
+  {
+    "id": "us-penny",
+    "slug": "us-penny",
+    "name": "US Penny",
+    "category": "coins",
+    "tags": ["usa", "1-cent", "copper", "lincoln", "currency"],
+    "dimensions": {
+      "widthMm": 19.05,
+      "heightMm": 19.05,
+      "shape": "circle"
+    },
+    "display": {
+      "color": "#b87333",
+      "borderColor": "#8b5a2b"
+    },
+    "meta": {
+      "title": "US Penny Actual Size — 1 Cent Coin on Screen",
+      "description": "See a US Penny (19.05 mm diameter) at its exact physical size on your screen. The smallest US coin by diameter.",
+      "h1": "US Penny — Actual Size on Screen",
+      "facts": [
+        "Diameter: 19.05 mm (0.750 inches)",
+        "Thickness: 1.52 mm",
+        "Composition: 97.5% zinc, 2.5% copper (post-1982)",
+        "Weight: 2.500 grams",
+        "Edge: Plain (smooth)"
+      ],
+      "relatedSlugs": ["us-quarter", "us-dime", "euro-1"],
+      "source": "https://www.usmint.gov/learn/coin-and-medal-programs/coin-specifications",
+      "updatedAt": "2025-01-15"
+    }
+  },
+  {
+    "id": "euro-1",
+    "slug": "euro-1",
+    "name": "€1 Euro Coin",
+    "category": "coins",
+    "tags": ["europe", "1-euro", "bimetallic", "currency"],
+    "dimensions": {
+      "widthMm": 23.25,
+      "heightMm": 23.25,
+      "shape": "circle"
+    },
+    "display": {
+      "color": "#d4af37",
+      "borderColor": "#b8902a"
+    },
+    "meta": {
+      "title": "€1 Euro Coin Actual Size — See It on Your Screen",
+      "description": "See a €1 Euro coin (23.25 mm diameter) at its true physical size on your screen. Compare with other world coins instantly.",
+      "h1": "€1 Euro Coin — Actual Size on Screen",
+      "facts": [
+        "Diameter: 23.25 mm",
+        "Thickness: 2.33 mm",
+        "Composition: Bimetallic — brass-clad nickel outer, nickel-brass inner",
+        "Weight: 7.500 grams",
+        "Edge: Interrupted milled"
+      ],
+      "relatedSlugs": ["us-quarter", "us-penny"],
+      "source": "https://www.ecb.europa.eu/euro/coins/html/index.en.html",
+      "updatedAt": "2025-01-15"
+    }
+  }
+]

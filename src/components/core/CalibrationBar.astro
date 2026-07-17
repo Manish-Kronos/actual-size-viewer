@@ -1,0 +1,573 @@
+---
+/**
+ * CalibrationBar — sticky banner that shows calibration status and launches the calibration flow.
+ *
+ * Design decisions:
+ * - Shows current DPI and confidence level
+ * - Primary method: credit card drag (most accurate)
+ * - Secondary: monitor diagonal input
+ * - Animates in when first shown; collapses after calibration
+ * - 100% CSS transitions — no layout thrash
+ */
+---
+
+<!-- Calibration Bar -->
+<div class="cal-bar" id="cal-bar" role="complementary" aria-label="Screen calibration">
+  <!-- Collapsed state: status pill -->
+  <div class="cal-bar__status" id="cal-bar-status">
+    <div class="container cal-bar__status-inner">
+      <div class="cal-bar__status-left">
+        <span class="cal-bar__dot" id="cal-dot"></span>
+        <span class="cal-bar__label" id="cal-label">Screen not calibrated — results may not be accurate</span>
+        <span class="cal-bar__dpi" id="cal-dpi"></span>
+      </div>
+      <button class="cal-bar__open-btn" id="cal-open-btn" aria-expanded="false" aria-controls="cal-panel">
+        Calibrate Screen
+      </button>
+    </div>
+  </div>
+
+  <!-- Expanded panel -->
+  <div class="cal-panel" id="cal-panel" hidden>
+    <div class="container">
+      <div class="cal-panel__inner glass">
+        <button class="cal-panel__close" id="cal-close-btn" aria-label="Close calibration panel">✕</button>
+
+        <h2 class="cal-panel__title">Calibrate Your Screen</h2>
+        <p class="cal-panel__desc">
+          Calibrate once for accurate sizes. Your result is saved automatically.
+        </p>
+
+        <!-- Method tabs -->
+        <div class="cal-tabs" role="tablist" aria-label="Calibration methods">
+          <button class="cal-tab cal-tab--active" role="tab" aria-selected="true"
+            data-method="credit-card" id="tab-credit-card">
+            💳 Credit Card
+          </button>
+          <button class="cal-tab" role="tab" aria-selected="false"
+            data-method="monitor" id="tab-monitor">
+            🖥️ Monitor Size
+          </button>
+        </div>
+
+        <!-- Method: Credit Card -->
+        <div class="cal-method" id="method-credit-card">
+          <p class="cal-method__instruction">
+            Place a <strong>credit card</strong> (or any ID card) flat on your screen, then drag the
+            right edge of the guide until it matches your card exactly.
+          </p>
+          <div class="cal-guide-area">
+            <div class="cal-guide" id="cal-guide">
+              <span class="cal-guide__label">Credit Card</span>
+              <span class="cal-guide__dims" id="cal-guide-dims">85.60 × 53.98 mm</span>
+              <div class="cal-guide__handle" id="cal-guide-handle" title="Drag to resize" aria-label="Drag to match card width">
+                ⟺
+              </div>
+            </div>
+            <div class="cal-guide-info">
+              <span id="cal-current-px">— px</span>
+              <span class="cal-guide-info__sep">→</span>
+              <span id="cal-current-dpi">— DPI</span>
+            </div>
+          </div>
+          <button class="cal-btn-apply" id="cal-apply-btn">
+            ✓ Apply This Calibration
+          </button>
+        </div>
+
+        <!-- Method: Monitor Diagonal -->
+        <div class="cal-method" id="method-monitor" hidden>
+          <p class="cal-method__instruction">
+            Enter your monitor's <strong>diagonal screen size</strong> in inches
+            (usually printed on the box or listed in specs).
+          </p>
+          <div class="cal-input-row">
+            <input
+              type="number"
+              id="cal-diagonal-input"
+              class="cal-input"
+              min="5"
+              max="120"
+              step="0.1"
+              placeholder="e.g. 27"
+              aria-label="Monitor diagonal size in inches"
+            />
+            <span class="cal-input-unit">inches</span>
+            <button class="cal-btn-apply" id="cal-diagonal-apply">
+              ✓ Apply
+            </button>
+          </div>
+          <p class="cal-method__note">
+            Note: This method may be less accurate on HiDPI/Retina displays.
+          </p>
+        </div>
+
+        <!-- Reset -->
+        <button class="cal-btn-reset" id="cal-reset-btn">Reset to Default (96 DPI)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Bar shell ───────────────────────────────────────────── */
+  .cal-bar {
+    position: sticky;
+    top: 60px; /* sits below site-header */
+    z-index: 90;
+  }
+
+  /* ── Status strip ────────────────────────────────────────── */
+  .cal-bar__status {
+    background-color: hsla(var(--bg-secondary-hsl), 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid hsl(var(--border-color-hsl));
+    padding: 8px 0;
+  }
+
+  .cal-bar__status-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .cal-bar__status-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .cal-bar__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: hsl(var(--text-secondary-hsl));
+    flex-shrink: 0;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+
+  .cal-bar__dot.is-calibrated {
+    background-color: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  }
+
+  .cal-bar__dot.is-medium {
+    background-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+  }
+
+  .cal-bar__label {
+    font-size: 0.82rem;
+    color: hsl(var(--text-secondary-hsl));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cal-bar__dpi {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: hsl(var(--accent-hsl));
+    flex-shrink: 0;
+  }
+
+  .cal-bar__open-btn {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid hsl(var(--border-color-hsl));
+    background: transparent;
+    color: hsl(var(--text-primary-hsl));
+    cursor: pointer;
+    transition: var(--transition-quick);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .cal-bar__open-btn:hover {
+    background: hsl(var(--bg-secondary-hsl));
+    border-color: hsl(var(--accent-hsl));
+    color: hsl(var(--accent-hsl));
+  }
+
+  /* ── Expanded panel ──────────────────────────────────────── */
+  .cal-panel {
+    border-bottom: 1px solid hsl(var(--border-color-hsl));
+    background-color: hsla(var(--bg-primary-hsl), 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 20px 0;
+    animation: slideDown 0.2s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .cal-panel__inner {
+    border-radius: var(--radius-md);
+    padding: 28px 32px;
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .cal-panel__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 1.1rem;
+    color: hsl(var(--text-secondary-hsl));
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-quick);
+    background: transparent;
+    border: none;
+  }
+
+  .cal-panel__close:hover {
+    background: hsl(var(--bg-secondary-hsl));
+    color: hsl(var(--text-primary-hsl));
+  }
+
+  .cal-panel__title {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+  }
+
+  .cal-panel__desc {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+
+  /* ── Method tabs ─────────────────────────────────────────── */
+  .cal-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid hsl(var(--border-color-hsl));
+    padding-bottom: 12px;
+  }
+
+  .cal-tab {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    color: hsl(var(--text-secondary-hsl));
+    transition: var(--transition-quick);
+  }
+
+  .cal-tab:hover { background: hsl(var(--bg-secondary-hsl)); color: hsl(var(--text-primary-hsl)); }
+
+  .cal-tab--active {
+    background: hsl(var(--bg-secondary-hsl));
+    border-color: hsl(var(--border-color-hsl));
+    color: hsl(var(--text-primary-hsl));
+    font-weight: 600;
+  }
+
+  /* ── Credit card guide ───────────────────────────────────── */
+  .cal-guide-area {
+    margin: 16px 0;
+  }
+
+  .cal-guide {
+    position: relative;
+    width: 200px; /* Starting width — user drags to match */
+    height: 126px; /* Proportional to ISO credit card aspect ratio */
+    background: linear-gradient(135deg, hsl(245, 50%, 20%), hsl(280, 50%, 25%));
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    min-width: 60px;
+    max-width: 100%;
+    user-select: none;
+    cursor: default;
+    overflow: visible;
+  }
+
+  .cal-guide__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .cal-guide__dims {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.9);
+    font-weight: 500;
+  }
+
+  .cal-guide__handle {
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 40px;
+    background: hsl(var(--accent-hsl));
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    cursor: ew-resize;
+    box-shadow: 0 2px 8px hsla(var(--accent-hsl), 0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+    touch-action: none;
+  }
+
+  .cal-guide__handle:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 14px hsla(var(--accent-hsl), 0.5);
+  }
+
+  .cal-guide-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 0.82rem;
+    color: hsl(var(--text-secondary-hsl));
+  }
+
+  .cal-guide-info__sep { opacity: 0.4; }
+
+  /* ── Apply / Reset buttons ───────────────────────────────── */
+  .cal-btn-apply {
+    margin-top: 16px;
+    padding: 10px 22px;
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition-quick);
+  }
+
+  .cal-btn-apply:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .cal-btn-reset {
+    display: block;
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: hsl(var(--text-secondary-hsl));
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: var(--transition-quick);
+  }
+
+  .cal-btn-reset:hover { color: hsl(var(--text-primary-hsl)); }
+
+  /* ── Monitor input ───────────────────────────────────────── */
+  .cal-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .cal-input {
+    width: 120px;
+    padding: 10px 14px;
+    border: 1px solid hsl(var(--border-color-hsl));
+    border-radius: var(--radius-sm);
+    background: hsl(var(--bg-secondary-hsl));
+    color: hsl(var(--text-primary-hsl));
+    font-family: inherit;
+    font-size: 1rem;
+    transition: var(--transition-quick);
+  }
+
+  .cal-input:focus {
+    outline: none;
+    border-color: hsl(var(--accent-hsl));
+    box-shadow: 0 0 0 3px hsla(var(--accent-hsl), 0.12);
+  }
+
+  .cal-input-unit {
+    font-size: 0.9rem;
+    color: hsl(var(--text-secondary-hsl));
+  }
+
+  .cal-method__note {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: hsl(var(--text-secondary-hsl));
+    font-style: italic;
+  }
+
+  .cal-method__instruction {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+</style>
+
+<script>
+  // ── CalibrationBar controller ─────────────────────────────────────────────
+  // All DOM state for the calibration UI lives here.
+
+  const api = () => (window as any).__actualsize;
+
+  // Elements
+  const bar      = document.getElementById("cal-bar")!;
+  const panel    = document.getElementById("cal-panel")!;
+  const openBtn  = document.getElementById("cal-open-btn")!;
+  const closeBtn = document.getElementById("cal-close-btn")!;
+  const applyBtn = document.getElementById("cal-apply-btn")!;
+  const resetBtn = document.getElementById("cal-reset-btn")!;
+  const guide    = document.getElementById("cal-guide")!;
+  const dot      = document.getElementById("cal-dot")!;
+  const label    = document.getElementById("cal-label")!;
+  const dpiEl    = document.getElementById("cal-dpi")!;
+  const pxEl     = document.getElementById("cal-current-px")!;
+  const dpiReadEl = document.getElementById("cal-current-dpi")!;
+  const tabs     = document.querySelectorAll<HTMLElement>(".cal-tab");
+  const methods  = document.querySelectorAll<HTMLElement>(".cal-method");
+  const diagInput = document.getElementById("cal-diagonal-input") as HTMLInputElement;
+  const diagApply = document.getElementById("cal-diagonal-apply")!;
+
+  // ── Panel open/close ─────────────────────────────────────────────────────
+
+  function openPanel(): void {
+    panel.hidden = false;
+    openBtn.setAttribute("aria-expanded", "true");
+  }
+
+  function closePanel(): void {
+    panel.hidden = true;
+    openBtn.setAttribute("aria-expanded", "false");
+  }
+
+  openBtn.addEventListener("click", openPanel);
+  closeBtn.addEventListener("click", closePanel);
+
+  // ── Method tabs ──────────────────────────────────────────────────────────
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const method = tab.dataset.method!;
+      tabs.forEach((t) => {
+        t.classList.remove("cal-tab--active");
+        t.setAttribute("aria-selected", "false");
+      });
+      tab.classList.add("cal-tab--active");
+      tab.setAttribute("aria-selected", "true");
+      methods.forEach((m) => {
+        m.hidden = m.id !== `method-${method}`;
+      });
+    });
+  });
+
+  // ── Credit card drag ─────────────────────────────────────────────────────
+
+  const CREDIT_CARD_WIDTH_MM = 85.6;
+  let cleanup: (() => void) | null = null;
+
+  function mmFromPx(px: number): number {
+    return (px / (window.devicePixelRatio || 1));
+  }
+
+  function updateGuideInfo(pxWidth: number): void {
+    const dpi = (pxWidth / CREDIT_CARD_WIDTH_MM) * 25.4;
+    pxEl.textContent = `${Math.round(pxWidth)} px`;
+    dpiReadEl.textContent = `${dpi.toFixed(1)} DPI`;
+  }
+
+  // Attach drag after API is ready
+  const initDrag = () => {
+    if (!api()) { setTimeout(initDrag, 50); return; }
+    cleanup = api().attachDragCalibration(guide, CREDIT_CARD_WIDTH_MM, updateGuideInfo);
+  };
+  initDrag();
+
+  // ── Apply credit-card calibration ────────────────────────────────────────
+
+  applyBtn.addEventListener("click", () => {
+    const pxWidth = guide.getBoundingClientRect().width;
+    api()?.calibrateFromKnownObject(CREDIT_CARD_WIDTH_MM, pxWidth);
+    closePanel();
+  });
+
+  // ── Apply diagonal calibration ───────────────────────────────────────────
+
+  diagApply.addEventListener("click", () => {
+    const val = parseFloat(diagInput.value);
+    if (val > 0) {
+      api()?.calibrateFromDiagonal(val);
+      closePanel();
+    }
+  });
+
+  diagInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") diagApply.click();
+  });
+
+  // ── Reset ────────────────────────────────────────────────────────────────
+
+  resetBtn.addEventListener("click", () => {
+    api()?.resetCalibration();
+  });
+
+  // ── Update status UI on calibration change ───────────────────────────────
+
+  function updateStatus(state: { dpi: number; method: string; confidence: string }): void {
+    const { dpi, method, confidence } = state;
+
+    // Dot color
+    dot.classList.remove("is-calibrated", "is-medium");
+    if (confidence === "high")   dot.classList.add("is-calibrated");
+    if (confidence === "medium") dot.classList.add("is-medium");
+
+    // Label
+    const methodLabels: Record<string, string> = {
+      "credit-card": "Calibrated via credit card",
+      "monitor": "Calibrated via monitor size",
+      "default": "Using default 96 DPI — calibrate for accuracy",
+    };
+    label.textContent = methodLabels[method] ?? `Calibrated (${method})`;
+
+    // DPI readout
+    dpiEl.textContent = confidence !== "default" ? `${dpi.toFixed(1)} DPI` : "";
+  }
+
+  // Listen for calibration updates
+  window.addEventListener("calibration:updated", (e: Event) => {
+    updateStatus((e as CustomEvent).detail);
+  });
+
+  // Also update on load in case calibration was already saved
+  const waitForApi = () => {
+    const state = api()?.getState?.();
+    if (state) {
+      updateStatus(state);
+    } else {
+      setTimeout(waitForApi, 50);
+    }
+  };
+  waitForApi();
+</script>

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "us-dollar-bill",
+    "slug": "us-dollar-bill",
+    "name": "US Dollar Bill",
+    "category": "currency",
+    "tags": ["usa", "banknote", "dollar", "usd", "cash"],
+    "dimensions": {
+      "widthMm": 156.1,
+      "heightMm": 66.3,
+      "shape": "rect",
+      "depthMm": 0.109
+    },
+    "display": {
+      "color": "#85a67a",
+      "borderColor": "#5c7a52"
+    },
+    "meta": {
+      "title": "US Dollar Bill Actual Size — See It on Your Screen",
+      "description": "See a US Dollar bill (156.1 × 66.3 mm) at its true physical size. All US Federal Reserve Notes share the same dimensions.",
+      "h1": "US Dollar Bill — Actual Size on Screen",
+      "facts": [
+        "Width: 156.1 mm (6.14 inches)",
+        "Height: 66.3 mm (2.61 inches)",
+        "Thickness: 0.109 mm (0.0043 inches)",
+        "All US bills ($1–$100) share the same dimensions",
+        "Composed of 75% cotton and 25% linen"
+      ],
+      "relatedSlugs": ["us-quarter", "standard-credit-card"],
+      "source": "https://www.federalreserve.gov/faqs/currency_12771.htm",
+      "updatedAt": "2025-01-15"
+    }
+  }
+]
