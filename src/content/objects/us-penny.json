@@ -1,0 +1,31 @@
+{
+  "id": "us-penny",
+  "slug": "us-penny",
+  "name": "US Penny",
+  "category": "coins",
+  "tags": ["usa", "1-cent", "copper", "lincoln", "currency"],
+  "dimensions": {
+    "widthMm": 19.05,
+    "heightMm": 19.05,
+    "shape": "circle"
+  },
+  "display": {
+    "color": "#b87333",
+    "borderColor": "#8b5a2b"
+  },
+  "meta": {
+    "title": "US Penny Actual Size — 1 Cent Coin on Screen",
+    "description": "See a US Penny (19.05 mm diameter) at its exact physical size on your screen. The smallest US coin by diameter.",
+    "h1": "US Penny — Actual Size on Screen",
+    "facts": [
+      "Diameter: 19.05 mm (0.750 inches)",
+      "Thickness: 1.52 mm",
+      "Composition: 97.5% zinc, 2.5% copper (post-1982)",
+      "Weight: 2.500 grams",
+      "Edge: Plain (smooth)"
+    ],
+    "relatedSlugs": ["us-quarter", "us-dime", "euro-1"],
+    "source": "https://www.usmint.gov/learn/coin-and-medal-programs/coin-specifications",
+    "updatedAt": "2025-01-15"
+  }
+}

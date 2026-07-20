@@ -1,0 +1,31 @@
+{
+  "id": "business-card",
+  "slug": "business-card",
+  "name": "Standard Business Card",
+  "category": "credit-cards",
+  "tags": ["business", "networking", "print", "us-standard"],
+  "dimensions": {
+    "widthMm": 88.9,
+    "heightMm": 50.8,
+    "shape": "rect"
+  },
+  "display": {
+    "color": "#f5f5f5",
+    "borderColor": "#d0d0d0"
+  },
+  "meta": {
+    "title": "Business Card Actual Size — Standard US Business Card Dimensions",
+    "description": "See a standard US business card (88.9 × 50.8 mm) at its true physical size on screen. Essential reference for print designers.",
+    "h1": "Standard Business Card — Actual Size on Screen",
+    "facts": [
+      "Width: 88.9 mm (3.5 inches)",
+      "Height: 50.8 mm (2.0 inches)",
+      "US Standard (differs from EU 85 × 55 mm)",
+      "Common stock: 14–16pt card stock",
+      "Print bleed area: typically +3mm all sides"
+    ],
+    "relatedSlugs": ["standard-credit-card"],
+    "source": "https://www.printingforless.com/business-card-sizes.html",
+    "updatedAt": "2025-01-15"
+  }
+}

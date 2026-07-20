@@ -1,0 +1,31 @@
+{
+  "id": "euro-1",
+  "slug": "euro-1",
+  "name": "€1 Euro Coin",
+  "category": "coins",
+  "tags": ["europe", "1-euro", "bimetallic", "currency"],
+  "dimensions": {
+    "widthMm": 23.25,
+    "heightMm": 23.25,
+    "shape": "circle"
+  },
+  "display": {
+    "color": "#d4af37",
+    "borderColor": "#b8902a"
+  },
+  "meta": {
+    "title": "€1 Euro Coin Actual Size — See It on Your Screen",
+    "description": "See a €1 Euro coin (23.25 mm diameter) at its true physical size on your screen. Compare with other world coins instantly.",
+    "h1": "€1 Euro Coin — Actual Size on Screen",
+    "facts": [
+      "Diameter: 23.25 mm",
+      "Thickness: 2.33 mm",
+      "Composition: Bimetallic — brass-clad nickel outer, nickel-brass inner",
+      "Weight: 7.500 grams",
+      "Edge: Interrupted milled"
+    ],
+    "relatedSlugs": ["us-quarter", "us-penny"],
+    "source": "https://www.ecb.europa.eu/euro/coins/html/index.en.html",
+    "updatedAt": "2025-01-15"
+  }
+}

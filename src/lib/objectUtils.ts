@@ -1,74 +1,82 @@
-/**
- * Object data loading and utility functions.
- * These run at build time in Astro's getStaticPaths / page frontmatter.
- */
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import type { ActualSizeObject, Category, CategoryId } from "../data/schema";
 
-// ─── Raw JSON imports ─────────────────────────────────────────────────────────
-// Astro resolves these at build time. Add new data files here.
-
-import coinsRaw from "../data/objects/coins.json";
-import creditCardsRaw from "../data/objects/credit-cards.json";
-import paperRaw from "../data/objects/paper.json";
-import phonesRaw from "../data/objects/phones.json";
-import currencyRaw from "../data/objects/currency.json";
-import categoriesRaw from "../data/categories.json";
-
-// ─── Typed collections ────────────────────────────────────────────────────────
-
-/** All objects across all categories, typed */
-export const ALL_OBJECTS: ActualSizeObject[] = [
-  ...(coinsRaw as ActualSizeObject[]),
-  ...(creditCardsRaw as ActualSizeObject[]),
-  ...(paperRaw as ActualSizeObject[]),
-  ...(phonesRaw as ActualSizeObject[]),
-  ...(currencyRaw as ActualSizeObject[]),
-];
-
-/** All categories, typed */
-export const ALL_CATEGORIES: Category[] = categoriesRaw as Category[];
-
-// ─── Lookup utilities ─────────────────────────────────────────────────────────
-
-/** Get a single object by its slug */
-export function getObjectBySlug(slug: string): ActualSizeObject | undefined {
-  return ALL_OBJECTS.find((obj) => obj.slug === slug);
+interface ObjectIndex {
+  objects: ActualSizeObject[];
+  categories: Category[];
+  objectMap: Map<string, ActualSizeObject>;
+  categoryMap: Map<string, Category>;
 }
 
-/** Get all objects in a category */
-export function getObjectsByCategory(categoryId: CategoryId): ActualSizeObject[] {
-  return ALL_OBJECTS.filter((obj) => obj.category === categoryId);
+let _cache: ObjectIndex | null = null;
+
+function toObj(e: CollectionEntry<"objects">): ActualSizeObject {
+  return e.data as ActualSizeObject;
 }
 
-/** Get a category by its slug */
-export function getCategoryBySlug(slug: string): Category | undefined {
-  return ALL_CATEGORIES.find((cat) => cat.slug === slug);
+function toCat(e: CollectionEntry<"categories">): Category {
+  return e.data as Category;
 }
 
-/** Get related objects by their slugs */
-export function getRelatedObjects(
+async function load(): Promise<ObjectIndex> {
+  if (_cache) return _cache;
+
+  const [objEntries, catEntries] = await Promise.all([
+    getCollection("objects"),
+    getCollection("categories"),
+  ]);
+
+  const objects = objEntries.map(toObj);
+  const categories = catEntries.map(toCat);
+
+  const objectMap = new Map<string, ActualSizeObject>();
+  for (const obj of objects) objectMap.set(obj.slug, obj);
+
+  const categoryMap = new Map<string, Category>();
+  for (const cat of categories) categoryMap.set(cat.id, cat);
+
+  _cache = { objects, categories, objectMap, categoryMap };
+  return _cache;
+}
+
+export async function getObjectBySlug(slug: string): Promise<ActualSizeObject | undefined> {
+  const idx = await load();
+  return idx.objectMap.get(slug);
+}
+
+export async function getObjectsByCategory(categoryId: CategoryId): Promise<ActualSizeObject[]> {
+  const idx = await load();
+  return idx.objects.filter((o) => o.category === categoryId);
+}
+
+export async function getCategoryBySlug(slug: string): Promise<Category | undefined> {
+  const idx = await load();
+  return idx.categoryMap.get(slug);
+}
+
+export async function getRelatedObjects(
   slugs: string[],
   exclude?: string
-): ActualSizeObject[] {
+): Promise<ActualSizeObject[]> {
+  const idx = await load();
   return slugs
     .filter((s) => s !== exclude)
-    .map((s) => getObjectBySlug(s))
+    .map((s) => idx.objectMap.get(s))
     .filter((obj): obj is ActualSizeObject => obj !== undefined);
 }
 
-// ─── Static path generation ───────────────────────────────────────────────────
-
-/** Used in [category]/index.astro getStaticPaths() */
-export function getCategoryPaths() {
-  return ALL_CATEGORIES.map((cat) => ({
+export async function getCategoryPaths() {
+  const idx = await load();
+  return idx.categories.map((cat) => ({
     params: { category: cat.slug },
-    props: { category: cat, objects: getObjectsByCategory(cat.id) },
+    props: { category: cat, objects: idx.objects.filter((o) => o.category === cat.id) },
   }));
 }
 
-/** Used in [category]/[slug].astro getStaticPaths() */
-export function getObjectPaths() {
-  return ALL_OBJECTS.map((obj) => ({
+export async function getObjectPaths() {
+  const idx = await load();
+  return idx.objects.map((obj) => ({
     params: { category: obj.category, slug: obj.slug },
     props: { object: obj },
   }));

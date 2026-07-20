@@ -10,7 +10,7 @@ import { round, mmToIn, mmToCm } from "../../lib/rendering";
 import type { ActualSizeObject } from "../../data/schema";
 
 export async function getStaticPaths() {
-  return getObjectPaths();
+  return await getObjectPaths();
 }
 
 interface Props {
@@ -25,8 +25,8 @@ const title = getObjectPageTitle(object);
 const canonicalUrl = getObjectCanonicalUrl(object);
 const jsonLd = buildObjectJsonLd(object, canonicalUrl);
 
-const category = getCategoryBySlug(object.category);
-const relatedObjects = getRelatedObjects(object.meta.relatedSlugs, object.slug);
+const category = await getCategoryBySlug(object.category);
+const relatedObjects = await getRelatedObjects(object.meta.relatedSlugs, object.slug);
 
 const breadcrumbs = [
   { name: "Home", href: "/" },

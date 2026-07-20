@@ -1,0 +1,31 @@
+{
+  "id": "standard-credit-card",
+  "slug": "standard-credit-card",
+  "name": "Standard Credit Card",
+  "category": "credit-cards",
+  "tags": ["visa", "mastercard", "id-1", "iso-7810", "wallet"],
+  "dimensions": {
+    "widthMm": 85.6,
+    "heightMm": 53.98,
+    "shape": "rect"
+  },
+  "display": {
+    "color": "#1a1a2e",
+    "borderColor": "#4a4a6a"
+  },
+  "meta": {
+    "title": "Credit Card Actual Size — Standard Card Dimensions on Screen",
+    "description": "See a standard credit card (85.60 × 53.98 mm) at its exact physical size on your screen. The ISO 7810 ID-1 format used worldwide.",
+    "h1": "Standard Credit Card — Actual Size on Screen",
+    "facts": [
+      "Width: 85.60 mm (3.370 inches)",
+      "Height: 53.98 mm (2.125 inches)",
+      "Thickness: 0.76 mm (standard)",
+      "Standard: ISO/IEC 7810 ID-1",
+      "Used by: Visa, Mastercard, Amex, driver's licenses, ID cards"
+    ],
+    "relatedSlugs": ["business-card"],
+    "source": "https://www.iso.org/standard/70483.html",
+    "updatedAt": "2025-01-15"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "us-quarter",
+  "slug": "us-quarter",
+  "name": "US Quarter",
+  "category": "coins",
+  "tags": ["usa", "25-cents", "silver", "washington", "currency"],
+  "dimensions": {
+    "widthMm": 24.26,
+    "heightMm": 24.26,
+    "shape": "circle"
+  },
+  "display": {
+    "color": "#c8c8c8",
+    "borderColor": "#a0a0a0"
+  },
+  "meta": {
+    "title": "US Quarter Actual Size — See It on Your Screen",
+    "description": "See a US Quarter (24.26 mm diameter) at its true physical size on your screen. Calibrate once with a credit card for perfect accuracy.",
+    "h1": "US Quarter — Actual Size on Screen",
+    "facts": [
+      "Diameter: 24.26 mm (0.955 inches)",
+      "Thickness: 1.75 mm",
+      "Composition: 91.67% copper, 8.33% nickel clad",
+      "Weight: 5.670 grams",
+      "Edge: 119 reeds"
+    ],
+    "relatedSlugs": ["us-penny", "us-dime", "euro-1"],
+    "source": "https://www.usmint.gov/learn/coin-and-medal-programs/coin-specifications",
+    "updatedAt": "2025-01-15"
+  }
+}

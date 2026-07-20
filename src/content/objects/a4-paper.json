@@ -1,0 +1,31 @@
+{
+  "id": "a4-paper",
+  "slug": "a4-paper",
+  "name": "A4 Paper",
+  "category": "paper",
+  "tags": ["iso-216", "paper", "printing", "international"],
+  "dimensions": {
+    "widthMm": 210,
+    "heightMm": 297,
+    "shape": "rect"
+  },
+  "display": {
+    "color": "#fffef7",
+    "borderColor": "#d0cfc0"
+  },
+  "meta": {
+    "title": "A4 Paper Actual Size — 210 × 297 mm on Your Screen",
+    "description": "See an A4 sheet of paper (210 × 297 mm) at its true physical size. The world's most common paper size, used in over 160 countries.",
+    "h1": "A4 Paper — Actual Size on Screen",
+    "facts": [
+      "Width: 210 mm (8.27 inches)",
+      "Height: 297 mm (11.69 inches)",
+      "Standard: ISO 216",
+      "Used in over 160 countries (all except US and Canada)",
+      "Aspect ratio: 1:√2 (approximately 1:1.414)"
+    ],
+    "relatedSlugs": ["letter-paper"],
+    "source": "https://www.iso.org/standard/36631.html",
+    "updatedAt": "2025-01-15"
+  }
+}

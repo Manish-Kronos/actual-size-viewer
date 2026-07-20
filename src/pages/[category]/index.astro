@@ -8,7 +8,7 @@ import { getCategoryPageTitle, getCategoryCanonicalUrl, buildCategoryJsonLd } fr
 import type { Category, ActualSizeObject } from "../../data/schema";
 
 export async function getStaticPaths() {
-  return getCategoryPaths();
+  return await getCategoryPaths();
 }
 
 interface Props {
