@@ -509,8 +509,6 @@
 
   applyBtn.addEventListener("click", () => {
     const pxWidth = guide.getBoundingClientRect().width;
-    console.log('[CAL LOG 2] Apply button — guide CSS width:', pxWidth, 'px');
-    console.log('[CAL LOG 5] devicePixelRatio:', window.devicePixelRatio);
     api()?.calibrateFromKnownObject(CREDIT_CARD_WIDTH_MM, pxWidth);
     closePanel();
   });
